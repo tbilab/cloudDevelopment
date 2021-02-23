@@ -1,0 +1,61 @@
+Start time: Sun Feb 21 00:11:55 2021
+
+              |============================|
+              |        REGENIE v2.0.1      |
+              |============================|
+
+Copyright (c) 2020 Joelle Mbatchou and Jonathan Marchini.
+Distributed under the MIT License.
+
+Log of output saved in file : /docker/test/test_out_extract.log
+
+Options in effect:
+  --step 2 \
+  --bed /docker/example/example_3chr \
+  --ref-first \
+  --covarFile /docker/example/covariates.txt \
+  --phenoFile /docker/example/phenotype_bin.txt \
+  --phenoColList Y2 \
+  --bsize 100 \
+  --test dominant \
+  --ignore-pred \
+  --extract /docker/test/test_out.snplist \
+  --out /docker/test/test_out_extract
+
+Association testing mode with multithreading using OpenMP
+ * bim              : [/docker/example/example_3chr.bim] n_snps = 500
+   -keeping only variants specified in [/docker/test/test_out.snplist]
+     +number of variants remaining in the analysis = 450
+ * fam              : [/docker/example/example_3chr.fam] n_samples = 500
+ * bed              : [/docker/example/example_3chr.bed]
+ * phenotypes       : [/docker/example/phenotype_bin.txt] n_pheno = 1
+   -dropping observations with missing values at any of the phenotypes
+   -number of phenotyped individuals = 500
+   -number of individuals remaining with non-missing phenotypes = 500
+ * covariates       : [/docker/example/covariates.txt] n_cov = 3
+   -number of individuals with covariate data = 500
+ * number of individuals used in analysis = 500
+ * no step 1 predictions given. Simple linear regression will be performed
+   -residualizing and scaling phenotypes...done (0ms) 
+ * # threads        : [7]
+ * block size       : [100]
+ * # blocks         : [5]
+ * approximate memory usage : 1MB
+ * using minimum MAC of 5 (variants with lower MAC are ignored)
+
+Chromosome 2 [4 blocks in total]
+ block [1] : done (1ms) 
+ block [2] : done (0ms) 
+ block [3] : done (0ms) 
+ block [4] : done (0ms) 
+Chromosome 3 [1 blocks in total]
+ block [5] : done (0ms) 
+
+Association results stored separately for each trait in files : 
+* [/docker/test/test_out_extract_Y2.regenie]
+
+Number of ignored tests due to low MAC : 0
+
+Elapsed time : 0.239151s
+End time: Sun Feb 21 00:11:55 2021
+

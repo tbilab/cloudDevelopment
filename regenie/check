@@ -1,0 +1,3 @@
+cmp test/test_bin_out_firth_Y1.regenie example/example.test_bin_out_firth_Y1.regenie \
+  && echo "Files are identical"
+

@@ -1,0 +1,80 @@
+Start time: Sun Feb 21 00:11:56 2021
+
+              |============================|
+              |        REGENIE v2.0.1      |
+              |============================|
+
+Copyright (c) 2020 Joelle Mbatchou and Jonathan Marchini.
+Distributed under the MIT License.
+
+Log of output saved in file : /docker/test/test_out_masks_V2.log
+
+Options in effect:
+  --step 2 \
+  --ignore-pred \
+  --bed /docker/example/example_3chr \
+  --extract /docker/test/tmp1.txt \
+  --covarFile /docker/example/covariates.txt \
+  --phenoFile /docker/example/phenotype_bin.txt \
+  --remove /docker/example/fid_iid_to_remove.txt \
+  --set-list /docker/example/example_3chr.setlist \
+  --anno-file /docker/example/example_3chr.annotations \
+  --mask-def /docker/example/example_3chr.masks \
+  --write-mask \
+  --write-setlist /docker/example/example_3chr.write_sets \
+  --bsize 15 \
+  --aaf-bins 0.2 \
+  --chrList 1,3 \
+  --htp TEST \
+  --out /docker/test/test_out_masks_V2
+
+Association testing mode (joint tests) with multithreading using OpenMP
+ * bim              : [/docker/example/example_3chr.bim] n_snps = 500
+   -keeping only variants specified in [/docker/test/tmp1.txt]
+     +number of variants remaining in the analysis = 70
+ * fam              : [/docker/example/example_3chr.fam] n_samples = 500
+   -removing individuals specified in [/docker/example/fid_iid_to_remove.txt]
+     +number of genotyped individuals to exclude from the analysis = 6
+ * bed              : [/docker/example/example_3chr.bed]
+ * phenotypes       : [/docker/example/phenotype_bin.txt] n_pheno = 2
+   -number of phenotyped individuals = 494
+ * covariates       : [/docker/example/covariates.txt] n_cov = 3
+   -number of individuals with covariate data = 494
+ * number of individuals used in analysis = 494
+ * no step 1 predictions given. Simple linear regression will be performed
+   -residualizing and scaling phenotypes...done (0ms) 
+ * annotations      : [/docker/example/example_3chr.annotations] 
+   +number of annotations categories = 3
+ * masks            : [/docker/example/example_3chr.masks] n_masks = 2
+ * aaf cutoffs      : [1 : 0.2 ] + singletons
+ * set file         : [/docker/example/example_3chr.setlist] n_sets = 2
+ * # threads        : [7]
+ * # tested sets    : [2]
+ * max block size   : [15]
+ * rule used to build masks : max
+ * approximate memory usage : 1MB
+ * user specified to write masks (in PLINK bed format)
+   +writing new set list files using [/docker/example/example_3chr.write_sets]  n_files = 2
+ * using minimum MAC of 5 (masks with lower MAC are ignored)
+ * user specified to test only on select chromosomes
+
+Chromosome 1 [1 sets in total]
+ set [1] : 40 variants...
+     -reading in genotypes and building masks...done (5ms) 
+     -computing association tests...done (0ms) 
+Chromosome 3 [1 sets in total]
+ set [2] : 30 variants...
+     -reading in genotypes and building masks...done (3ms) 
+     -computing association tests...done (0ms) 
+
+Association results stored separately for each trait (HTPv4 format) in files : 
+* [/docker/test/test_out_masks_V2_Y1.regenie]
+* [/docker/test/test_out_masks_V2_Y2.regenie]
+
+Number of ignored tests due to low MAC : 0
+
+Masks written to : [/docker/test/test_out_masks_V2_masks.{bed,bim,fam}]
+
+Elapsed time : 0.0728826s
+End time: Sun Feb 21 00:11:56 2021
+
