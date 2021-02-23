@@ -2,7 +2,7 @@
 
 ## regenie_step1,  regenie_step2_v1,  regenie_step2_v2
 
-To run using Docker:
+To run using Docker: https://github.com/rgcgithub/regenie/wiki/Using-docker
 
   1. cd regenie
   2. make docker-build
