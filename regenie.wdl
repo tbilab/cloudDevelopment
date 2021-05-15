@@ -1,6 +1,6 @@
-version development
+version 1.0
 
-## Version 04-05-2021
+## Version 05-14-2021
 ##
 ## This WDL workflow runs Regenie.
 ## This workflow assumes users have thoroughly read the Regenie docs for caveats and details.
@@ -10,7 +10,9 @@ version development
 ## PLINK can be used to convert bed, bim, and fam files to BGEN files outside of this workflow.
 ## PLINK can also be used to convert pgen, pvar, and psam files to BGEN files outside of this workflow.
 ##
-## Cromwell version support - Successfully tested on v59
+## Snapshot 158 - uses BGEN for step2 - one BGEN file with all chromosomes contained within (1-22, X, etc.).
+##
+## Cromwell version support - Successfully tested on v62
 ##
 ## Distributed under terms of the MIT License
 ## Copyright (c) 2021 Brian Sharber
@@ -21,8 +23,8 @@ workflow Regenie {
     # Refer to Regenie's documentation for the descriptions to most of these parameters.
     input {
         File bgen_step1
-        File bgen_step2
-        String fit_bin_out_name # File prefix for the list of predictions produced in Step1.
+        File bed_files_step2_file # File containing list of .bed, .bim, .fam files used for Step2.
+        String fit_bin_out_name = "fit_bin_out" # File prefix for the list of predictions produced in Step1.
         File? fit_bin_out
         File? sample
         File? keep
@@ -37,15 +39,18 @@ workflow Regenie {
         String? covarColList
         String? catCovarList
         File? pred
-        Int? memory
-        Int? disk
-        Int? threads
-        String docker_image # Compiled with Boost IOSTREAM: https://github.com/rgcgithub/regenie/wiki/Using-docker
+        Int memory = 4
+        Int disk = 200
+        Int threads = 1
+        Int preemptible = 1
+        Int maxRetries = 0
+        String docker_image = "briansha/regenie:v2.0.1_boost" # Compiled with Boost IOSTREAM: https://github.com/rgcgithub/regenie/wiki/Using-docker
         String docker_image_R = "r-base:4.0.3"
-        Array[Int] chr_list # List of chromosomes for Step2.
+        Array[Int] chr_list # List of chromosomes used for analysis.
         Array[String] phenotype_names # Phenotypes you want to analyze. (Column names).
-        
     }
+    
+    Array[Array[String]] bed_files_step2 = read_tsv(bed_files_step2_file)
 
     call RegenieStep1WholeGenomeModel { 
         input: 
@@ -59,15 +64,19 @@ workflow Regenie {
             memory = memory,
             disk = disk,
             threads = threads,
+            preemptible = preemptible,
+            maxRetries = maxRetries,
             docker_image = docker_image
     }
     
-    scatter (chromosome in chr_list) {
+    scatter (files in bed_files_step2) {
       call RegenieStep2AssociationTesting { 
           input: 
-              bgen_step2 = bgen_step2,
+              bed_step2 = files[0],
+              bim_step2 = files[1],
+              fam_step2 = files[2],
+              chr_name = files[3],
               keep = keep,
-              chr = chromosome, # May need to change to chrList = chr_list later, as chr is Int only...not accounting for X, Y, etc.
               covarFile = covarFile,
               exclude = exclude,
               phenoFile = phenoFile,
@@ -76,6 +85,8 @@ workflow Regenie {
               memory = memory,
               disk = disk,
               threads = threads,
+              preemptible = preemptible,
+              maxRetries = maxRetries,
               docker_image = docker_image,
               output_locos = RegenieStep1WholeGenomeModel.output_locos
       }
@@ -88,6 +99,8 @@ workflow Regenie {
         memory = memory,
         disk = disk,
         threads = threads,
+        preemptible = preemptible,
+        maxRetries = maxRetries,
         phenotype_names = phenotype_names,
         docker_image_R = docker_image_R
     }
@@ -98,6 +111,8 @@ workflow Regenie {
         memory = memory,
         disk = disk,
         threads = threads,
+        preemptible = preemptible,
+        maxRetries = maxRetries,
         docker_image_R = docker_image_R,
         file_input = join_Output.outputs
     }
@@ -127,6 +142,8 @@ task RegenieStep1WholeGenomeModel {
         Int? memory
         Int? disk
         Int? threads
+        Int? preemptible
+        Int? maxRetries
         
         File? sample
         File? keep
@@ -142,32 +159,32 @@ task RegenieStep1WholeGenomeModel {
         String? catCovarList
         File? pred
         
-        Boolean ref_first
-        Boolean lowmem
-        Boolean lowmem_prefix_flag
-        String? lowmem_prefix
-        Boolean bt  # Specifies both phenotype file and covariate files contain binary values.
-        Boolean cc12
+        Boolean ref_first = false
+        Boolean lowmem = false
+        Boolean lowmem_prefix_flag = false
+        String? lowmem_prefix = false
+        Boolean bt = false # Specifies both phenotype file and covariate files contain binary values.
+        Boolean cc12 = false
         Int? cv
-        Boolean loocv
+        Boolean loocv = false
         String? split_l0
         File? run_l0
         File? run_l1
-        Boolean keep_l0
-        Boolean print_prs
-        Boolean force_step1
+        Boolean keep_l0 = false
+        Boolean print_prs = false
+        Boolean force_step1 = false
         Int? nb
-        Boolean strict
-        Boolean ignore_pred
-        Boolean use_prs
-        Boolean gz
-        Boolean force_impute
-        Boolean write_samples
-        Boolean print_pheno
-        Boolean firth
-        Boolean approx
-        Boolean firth_se
-        Boolean spa
+        Boolean strict = false
+        Boolean ignore_pred = false
+        Boolean use_prs = false
+        Boolean gz = false
+        Boolean force_impute = false
+        Boolean write_samples = false
+        Boolean print_pheno = false
+        Boolean firth = false
+        Boolean approx = false
+        Boolean firth_se = false
+        Boolean spa = false
         Float? pThresh
         String? test
         Int? chr
@@ -180,9 +197,9 @@ task RegenieStep1WholeGenomeModel {
         Int? niter
         Int? maxstep_null
         Int? maxiter_null
-        Boolean debug
-        Boolean verbose
-        Boolean help
+        Boolean debug = false
+        Boolean verbose = false
+        Boolean help = false
     }
 
     command <<<
@@ -256,6 +273,8 @@ task RegenieStep1WholeGenomeModel {
         memory: memory + " GiB"
 	disks: "local-disk " + disk + " HDD"
         cpu: threads
+        preemptible: preemptible
+        maxRetries: maxRetries
     }
 }
 
@@ -265,15 +284,20 @@ task RegenieStep2AssociationTesting {
     # Refer to Regenie's documentation for the descriptions to most of these parameters.
     input {
         String docker_image
-        File bgen_step2
+        File bed_step2
+        File bim_step2
+        File fam_step2
         Array[File] output_locos
         File? fit_bin_out
         Int? memory
         Int? disk
         Int? threads
+        Int? preemptible
+        Int? maxRetries
+        
         Int bsize  # 1000 is recommended by regenie's documentation
         File? pred # File containing predictions from Step 1
-        
+        String? chr_name
         File? sample
         File? keep
         File? remove
@@ -287,31 +311,31 @@ task RegenieStep2AssociationTesting {
         String? covarColList
         String? catCovarList
 
-        Boolean ref_first
-        Boolean lowmem
-        Boolean lowmem_prefix_flag
+        Boolean ref_first = false
+        Boolean lowmem = false
+        Boolean lowmem_prefix_flag = false
         String? lowmem_prefix
-        Boolean bt
-        Boolean cc12
+        Boolean bt = false
+        Boolean cc12 = false
         Int? cv
-        Boolean loocv
+        Boolean loocv = false
         String? split_l0
         File? run_l0
         File? run_l1
-        Boolean keep_l0
-        Boolean print_prs
+        Boolean keep_l0 = false
+        Boolean print_prs = false
         Int? nb
-        Boolean strict
-        Boolean ignore_pred
-        Boolean use_prs
-        Boolean gz
-        Boolean force_impute
-        Boolean write_samples
-        Boolean print_pheno
-        Boolean firth
-        Boolean approx
-        Boolean firth_se
-        Boolean spa
+        Boolean strict = false
+        Boolean ignore_pred = false
+        Boolean use_prs = false
+        Boolean gz = false
+        Boolean force_impute = false
+        Boolean write_samples = false
+        Boolean print_pheno = false
+        Boolean firth = false
+        Boolean approx = false
+        Boolean firth_se = false
+        Boolean spa = false
         Float? pThresh
         String? test
         Int? chr
@@ -324,9 +348,9 @@ task RegenieStep2AssociationTesting {
         Int? niter
         Int? maxstep_null
         Int? maxiter_null
-        Boolean debug
-        Boolean verbose
-        Boolean help
+        Boolean debug = false
+        Boolean verbose = false
+        Boolean help = false
         
         File? anno_file
         File? set_list
@@ -338,12 +362,12 @@ task RegenieStep2AssociationTesting {
         File? mask_def
         Float? aaf_bins
         String? build_mask
-        Boolean singleton_carrier
-        Boolean write_mask
-        Boolean skip_test
+        Boolean singleton_carrier = false
+        Boolean write_mask = false
+        Boolean skip_test = false
         String? mask_lovo
-        Boolean check_burden_files
-        Boolean strict_check_burden
+        Boolean check_burden_files = false
+        Boolean strict_check_burden = false
     }
 
     # Loco files are moved to the current working directory due to the list of predictions (pred) expecting them to be there.
@@ -353,7 +377,7 @@ task RegenieStep2AssociationTesting {
         done
         regenie \
         --step 2 \
-        --bgen=~{bgen_step2} \
+        --bed=~{sub(bed_step2,'\\.bed$','')} \
         --phenoFile=~{phenoFile} \
         ~{if defined(covarFile) then "--covarFile=~{covarFile} " else " "} \
         ~{if defined(sample) then "--sample=~{sample} " else " "} \
@@ -423,7 +447,7 @@ task RegenieStep2AssociationTesting {
         ~{if defined(mask_lovo) then "--mask_lovo=~{mask_lovo} " else " "} \
         ~{if check_burden_files then "--check_burden_files " else " "} \
         ~{if strict_check_burden then "--strict_check_burden " else " "} \
-        --out ~{chr}
+        --out ~{chr_name}
     >>>
     
     output {
@@ -433,8 +457,10 @@ task RegenieStep2AssociationTesting {
     runtime {
         docker: docker_image
         memory: memory + " GiB"
-		disks: "local-disk " + disk + " HDD"
+	disks: "local-disk " + disk + " HDD"
         cpu: threads
+        preemptible: preemptible
+        maxRetries: maxRetries
     }
 }
 
@@ -449,6 +475,8 @@ task join_Output {
     Int? memory
     Int? disk
     Int? threads
+    Int? preemptible
+    Int? maxRetries
     String docker_image_R
   }
   
@@ -467,7 +495,7 @@ task join_Output {
   >>>
   
   output {
-    Array[File] outputs = glob("*.regenie")
+        Array[File] outputs = glob("*.regenie")
   }
   
   runtime {
@@ -475,6 +503,8 @@ task join_Output {
         memory: memory + " GiB"
 	disks: "local-disk " + disk + " HDD"
         cpu: threads
+        preemptible: preemptible
+        maxRetries: maxRetries
   }
 }
 
@@ -487,6 +517,8 @@ task Plots {
     Int? memory
     Int? disk
     Int? threads
+    Int? preemptible
+    Int? maxRetries
     String docker_image_R
     Array[File] file_input
   }
@@ -527,8 +559,8 @@ task Plots {
   >>>
   
   output {
-    Array[File] output_plots = glob("*.png")
-    Array[File] output_regenie = glob("*.regenie")
+        Array[File] output_plots = glob("*.png")
+        Array[File] output_regenie = glob("*.regenie")
   }
   
   runtime {
@@ -536,5 +568,7 @@ task Plots {
         memory: memory + " GiB"
 	disks: "local-disk " + disk + " HDD"
         cpu: threads
+        preemptible: preemptible
+        maxRetries: maxRetries
   }
 }
