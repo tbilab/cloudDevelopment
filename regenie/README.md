@@ -14,7 +14,7 @@ The other tasks use an official R docker image: https://hub.docker.com/_/r-base
   - PLINK can be used to convert bed, bim, and fam files to BGEN files outside of this workflow.
   - PLINK can also be used to convert pgen, pvar, and psam files to BGEN files outside of this workflow.
    
-regenie_alternate.wdl
+## regenie_alternate.wdl
   - Step1 - Made with BGEN files in mind to use as the input genetic data file. - (BGEN version 1.2, 8-bit probabilities)
   - Step2 - Use a BGEN file containing all chromosomal data (chr 1-22, etc.)
   - PLINK can be used to convert bed, bim, and fam files to BGEN files outside of this workflow.
