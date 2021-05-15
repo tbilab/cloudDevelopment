@@ -50,7 +50,7 @@ workflow BCF_To_VCF {
     }
 
     meta {
-    	  author : "Brian Sharber"
+    	author : "Brian Sharber"
         email : "brian.sharber@vumc.org"
         description : "Run BCFTOOLS"
     }
@@ -161,7 +161,7 @@ task Convert_File {
     runtime {
         docker: docker_image
         memory: memory + " GiB"
-		    disks: "local-disk " + disk + " HDD"
+	disks: "local-disk " + disk + " HDD"
         cpu: threads
         preemptible: preemptible
         maxRetries: maxRetries
