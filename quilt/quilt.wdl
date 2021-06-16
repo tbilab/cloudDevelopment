@@ -26,9 +26,9 @@ workflow run_quilt {
 	}
 
     meta {
-	     author : "Brian Sharber"
-	     email : "brian.sharber@vumc.org"
-	     description : "This WDL workflow runs QUILT - https://github.com/rwdavies/QUILT#paragraph-installation"
+	author : "Brian Sharber"
+	email : "brian.sharber@vumc.org"
+	description : "This WDL workflow runs QUILT - https://github.com/rwdavies/QUILT#paragraph-installation"
     }
 }
 
@@ -192,11 +192,11 @@ task Imputation {
 	>>>
 
     runtime {
-		  docker: docker
-		  memory: memory + " GiB"
-		  disks: "local-disk " + disk + " HDD"
+	  docker: docker
+	  memory: memory + " GiB"
+	  disks: "local-disk " + disk + " HDD"
           cpu: cpu
-		  preemptible: preemptible
+	  preemptible: preemptible
           maxRetries: maxRetries
 	}
 
