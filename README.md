@@ -2,7 +2,7 @@
 
 Repository for Cloud Application Development.
 
-# WDLs I have developed:
+## Additional WDLs I have developed:
 
 Regenie WDL: https://github.com/briansha/Regenie_WDL
 
@@ -16,7 +16,7 @@ Polygenic Risk Scores: https://github.com/briansha/Polygenic_Risk_Scores
 
 PLINK GWAS: https://github.com/briansha/Plink_GWAS
 
-# WDLs collaborated on:
+## WDLs collaborated on:
 
 Annovar Whitelist Filter: https://github.com/briansha/Annovar_Whitelist_Filter_WDL
 
