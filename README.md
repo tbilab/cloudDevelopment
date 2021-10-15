@@ -2,7 +2,9 @@
 
 Repository for Cloud Application Development.
 
-## Additional WDLs I have developed:
+Workflows within this repository mainly deal with file manipulation - getting data ready.
+
+## WDLs for genome analysis:
 
 Regenie WDL: https://github.com/briansha/Regenie_WDL
 
