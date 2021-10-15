@@ -90,7 +90,7 @@ task Filter_File {
     runtime {
         docker: docker
         memory: memory + " GiB"
-		disks: "local-disk " + disk + " HDD"
+	disks: "local-disk " + disk + " HDD"
         cpu: cpu
         preemptible: preemptible
         maxRetries: maxRetries
@@ -128,7 +128,7 @@ task Convert_File {
     runtime {
         docker: docker
         memory: memory + " GiB"
-		disks: "local-disk " + disk + " HDD"
+	disks: "local-disk " + disk + " HDD"
         cpu: cpu
         preemptible: preemptible
         maxRetries: maxRetries
