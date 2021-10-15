@@ -1,6 +1,6 @@
 version 1.0
 
-## Version 04-05-2021
+## Version 06-06-2021
 ##
 ## This workflow converts BCF files to VCF files or vice-versa using BCFTools.
 ## This workflow assumes users have thoroughly read the BCFTools documentation for the view command section.
@@ -8,26 +8,20 @@ version 1.0
 ##
 ## This workflow will run into issues if:
 ##     - the samples parameter is used.
-##     - use the samples_file parameter instead and place all samples in one file in one column.  
+##     - use the samples_file parameter instead and place all samples in one file in one column.
 ##
-## Cromwell version support - Successfully tested on v59
+## Cromwell version support - Successfully tested on v63
 ##
 ## Distributed under terms of the MIT License
 ## Copyright (c) 2021 Brian Sharber
 ## Contact <brian.sharber@vumc.org>
 
 workflow BCF_To_VCF {
-
     input {
         Array[File] input_file    # Input files - need to all be either BCF or VCF files and will be converted according to the --output-type parameter.
         Array[String] output_name # Output names - user-defined names for the converted files.
         File? index_file
-        String docker_image = "briansha/bcftools:v1.9"
-        Int memory = 4
-        Int disk = 200
-        Int threads = 1
-        Int preemptible = 1
-        Int maxRetries = 0
+        String bcftools_docker = "briansha/bcftools:v1.9"
     }
 
     scatter (file_and_output in zip(input_file, output_name)) {
@@ -36,12 +30,7 @@ workflow BCF_To_VCF {
             input_file = file_and_output.left,
             output_name = file_and_output.right,
             index_file = index_file,
-            docker_image = docker_image,
-            memory = memory,
-            disk = disk,
-            threads = threads,
-            preemptible = preemptible,
-            maxRetries = maxRetries
+            docker = bcftools_docker
       }
     }
 
@@ -57,17 +46,16 @@ workflow BCF_To_VCF {
 }
 
 task Convert_File {
-
     # Refer to BCFTools documentation for the descriptions to most of these parameters.
     input {
         File input_file
         File? index_file
-        String docker_image
-        Int? memory
-        Int? disk
-        Int? threads
-        Int? preemptible
-        Int? maxRetries
+        String docker
+        Int? disk_size_override
+        Float memory = 3.5
+        Int cpu = 1
+        Int preemptible = 1
+        Int maxRetries = 0
 
         Boolean drop_genotypes = false
         Boolean header_only = false
@@ -111,8 +99,11 @@ task Convert_File {
         Boolean private = false
         Boolean exclude_private = false
     }
+    Float vcf_size = size(input_file, "GiB")
+    Int disk = select_first([disk_size_override, ceil(10.0 + 3.0 * vcf_size)])
 
     command <<<
+        set -euo pipefail
         bcftools view \
         ~{if drop_genotypes then "--drop-genotypes " else " "} \
         ~{if header_only then "--header-only " else " "} \
@@ -123,7 +114,7 @@ task Convert_File {
         ~{if defined(output_name) then "--output-file ~{output_name} " else " "} \
         ~{if defined(targets) then "--targets ~{targets} " else " "} \
         ~{if defined(targets_file) then "--targets-file ~{targets_file} " else " "} \
-        ~{if defined(threads) then "--threads ~{threads} " else " "} \
+        ~{if defined(cpu) then "--threads ~{cpu} " else " "} \
         ~{if trim_alt_alleles then "--trim-alt-alleles " else " "} \
         ~{if force_samples then "--force-samples " else " "} \
         ~{if no_update then "--no-update " else " "} \
@@ -159,10 +150,10 @@ task Convert_File {
     }
 
     runtime {
-        docker: docker_image
+        docker: docker
         memory: memory + " GiB"
-	disks: "local-disk " + disk + " HDD"
-        cpu: threads
+		disks: "local-disk " + disk + " HDD"
+        cpu: cpu
         preemptible: preemptible
         maxRetries: maxRetries
     }
