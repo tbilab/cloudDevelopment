@@ -45,6 +45,9 @@ workflow BCF_To_VCF {
     }
 }
 
+# BCFTOOLS has parallelism capability.
+# Doubling the CPU will cut the execution time in half.
+# Make sure to adjust the memory to accommodate the CPU - usually CPUx4 is a good hedge.
 task Convert_File {
     # Refer to BCFTools documentation for the descriptions to most of these parameters.
     input {
@@ -52,8 +55,8 @@ task Convert_File {
         File? index_file
         String docker
         Int? disk_size_override
-        Float memory = 3.5
-        Int cpu = 1
+        Float memory = 128.0
+        Int cpu = 32
         Int preemptible = 1
         Int maxRetries = 0
 
