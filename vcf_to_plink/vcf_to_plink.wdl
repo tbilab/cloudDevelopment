@@ -59,7 +59,7 @@ task Convert_File {
         Int maxRetries = 0
     }
     Float vcf_size = size(input_file, "GiB")
-    Int disk = select_first([disk_size_override, ceil(24.0 + 10.0 * vcf_size)])
+    Int disk = select_first([disk_size_override, ceil(10.0 + 24.0 * vcf_size)])
 
     command <<<
         set -euo pipefail
