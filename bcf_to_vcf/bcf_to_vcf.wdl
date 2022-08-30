@@ -1,15 +1,15 @@
 version 1.0
 
-## Version 06-06-2021
+## Version 08-30-2022
 ##
 ## This workflow converts BCF files to VCF files or vice-versa using BCFTools.
 ## This workflow assumes users have thoroughly read the BCFTools documentation for the view command section.
 ## BCFTools documentation: http://samtools.github.io/bcftools/bcftools.html
 ##
-## This workflow will run into issues if:
+## This workflow will run into issues if: 
 ##     - the samples parameter is used.
-##     - use the samples_file parameter instead and place all samples in one file in one column.
-##
+##     - use the samples_file parameter instead and place all samples in one file in one column.  
+## 
 ## Cromwell version support - Successfully tested on v63
 ##
 ## Distributed under terms of the MIT License
@@ -23,10 +23,10 @@ workflow BCF_To_VCF {
         File? index_file
         String bcftools_docker = "briansha/bcftools:v1.9"
     }
-
+    
     scatter (file_and_output in zip(input_file, output_name)) {
-        call Convert_File {
-          input:
+        call Convert_File { 
+          input: 
             input_file = file_and_output.left,
             output_name = file_and_output.right,
             index_file = index_file,
@@ -37,7 +37,7 @@ workflow BCF_To_VCF {
     output {
         Array[File] output_files = Convert_File.converted_file
     }
-
+    
     meta {
     	author : "Brian Sharber"
         email : "brian.sharber@vumc.org"
@@ -59,7 +59,7 @@ task Convert_File {
         Int cpu = 32
         Int preemptible = 1
         Int maxRetries = 0
-
+        
         Boolean drop_genotypes = false
         Boolean header_only = false
         Boolean no_header = false
@@ -76,7 +76,7 @@ task Convert_File {
         Boolean no_update = false
         Array[String]? samples
         File? samples_file
-
+        
         Int? min_ac_int
         String? min_ac_string
         Int? max_ac_int
@@ -136,7 +136,7 @@ task Convert_File {
         ~{if phased then "--phased " else " "} \
         ~{if exclude_phased then "--exclude-phased " else " "} \
         ~{if defined(min_af_float) then "--min-af ~{min_af_float} ~{min_af_string} " else " "} \
-        ~{if defined(min_af_float) then "--max-af ~{max_af_float} ~{max_af_string} " else " "} \
+        ~{if defined(max_af_float) then "--max-af ~{max_af_float} ~{max_af_string} " else " "} \
         ~{if uncalled then "--uncalled " else " "} \
         ~{if exclude_uncalled then "--exclude-uncalled " else " "} \
         ~{if defined(types) then "--types ~{types} " else " "} \
@@ -147,7 +147,7 @@ task Convert_File {
         ~{if defined(regions) then "--regions ~{regions} " else " "} \
         ~{if defined(regions_file) then "--regions-file ~{regions_file} " else " "}
     >>>
-
+    
     output {
         File converted_file = "${output_name}"
     }
@@ -155,7 +155,7 @@ task Convert_File {
     runtime {
         docker: docker
         memory: memory + " GiB"
-	disks: "local-disk " + disk + " HDD"
+		disks: "local-disk " + disk + " HDD"
         cpu: cpu
         preemptible: preemptible
         maxRetries: maxRetries
